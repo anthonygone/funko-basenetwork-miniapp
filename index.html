@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiniBase • App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; }
+    .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(12px); }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-black text-white min-h-screen">
+
+  <div class="max-w-4xl mx-auto p-6">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-bold flex items-center gap-3">
+        <i class="fa-solid fa-cube text-blue-500"></i>
+        MiniBase
+      </h1>
+      <div class="flex gap-2">
+        <button onclick="toggleDark()" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Todo List -->
+      <div class="md:col-span-2 bg-gray-900/80 rounded-3xl p-6 border border-gray-700">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-semibold flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-emerald-400"></i> Tasks
+          </h2>
+          <div class="text-sm text-gray-400" id="task-count">0 tasks</div>
+        </div>
+
+        <div class="flex gap-2 mb-4">
+          <input type="text" id="todo-input" 
+                 class="flex-1 bg-gray-800 border border-gray-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-blue-500"
+                 placeholder="Add a new task..." onkeypress="if(event.key==='Enter') addTodo()">
+          <button onclick="addTodo()" 
+                  class="bg-blue-600 hover:bg-blue-500 px-6 rounded-2xl font-medium">
+            Add
+          </button>
+        </div>
+
+        <div id="todo-list" class="space-y-2 max-h-96 overflow-auto"></div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+
+        <!-- Timer / Pomodoro -->
+        <div class="bg-gray-900/80 rounded-3xl p-6 border border-gray-700">
+          <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-clock text-orange-400"></i> Focus Timer
+          </h2>
+          <div id="timer" class="text-6xl font-mono text-center mb-6">25:00</div>
+          
+          <div class="flex gap-3 justify-center">
+            <button onclick="startTimer()" class="flex-1 bg-orange-500 hover:bg-orange-600 py-3 rounded-2xl font-medium">Start</button>
+            <button onclick="pauseTimer()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-2xl font-medium">Pause</button>
+            <button onclick="resetTimer()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-2xl font-medium">Reset</button>
+          </div>
+        </div>
+
+        <!-- Quick Notes -->
+        <div class="bg-gray-900/80 rounded-3xl p-6 border border-gray-700 h-full">
+          <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-note-sticky text-purple-400"></i> Quick Note
+          </h2>
+          <textarea id="quick-note" 
+                    class="w-full h-48 bg-gray-800 border border-gray-700 rounded-2xl p-4 resize-none focus:outline-none focus:border-purple-500"
+                    placeholder="Write anything..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Stats -->
+    <div class="mt-8 text-center text-gray-500 text-sm">
+      Built as single HTML • Data saved in browser
+    </div>
+  </div>
+
+  <script>
+    // Tailwind script already loaded
+
+    // Todo List
+    let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+    function renderTodos() {
+      const container = document.getElementById('todo-list');
+      container.innerHTML = '';
+      
+      todos.forEach((todo, index) => {
+        const div = document.createElement('div');
+        div.className = `flex items-center gap-3 bg-gray-800/70 rounded-2xl p-4 group ${todo.done ? 'opacity-60' : ''}`;
+        div.innerHTML = `
+          <input type="checkbox" ${todo.done ? 'checked' : ''} 
+                 class="w-5 h-5 accent-emerald-500" 
+                 onchange="toggleDone(${index})">
+          <span class="flex-1 ${todo.done ? 'line-through text-gray-500' : ''}">${todo.text}</span>
+          <button onclick="deleteTodo(${index})" 
+                  class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-500">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        `;
+        container.appendChild(div);
+      });
+
+      document.getElementById('task-count').textContent = `${todos.length} tasks`;
+    }
+
+    function addTodo() {
+      const input = document.getElementById('todo-input');
+      if (input.value.trim() === '') return;
+      
+      todos.push({ text: input.value.trim(), done: false });
+      localStorage.setItem('todos', JSON.stringify(todos));
+      input.value = '';
+      renderTodos();
+    }
+
+    function toggleDone(index) {
+      todos[index].done = !todos[index].done;
+      localStorage.setItem('todos', JSON.stringify(todos));
+      renderTodos();
+    }
+
+    function deleteTodo(index) {
+      todos.splice(index, 1);
+      localStorage.setItem('todos', JSON.stringify(todos));
+      renderTodos();
+    }
+
+    // Timer
+    let timerInterval;
+    let timeLeft = 25 * 60;
+    let isRunning = false;
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      document.getElementById('timer').textContent = 
+        `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
+    function startTimer() {
+      if (isRunning) return;
+      isRunning = true;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          isRunning = false;
+          alert("🎉 Time's up! Great focus session!");
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      timeLeft = 25 * 60;
+      updateTimerDisplay();
+    }
+
+    // Dark mode toggle (already dark by default)
+    function toggleDark() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    // Auto save note
+    const noteArea = document.getElementById('quick-note');
+    noteArea.value = localStorage.getItem('quickNote') || '';
+    
+    noteArea.addEventListener('input', () => {
+      localStorage.setItem('quickNote', noteArea.value);
+    });
+
+    // Init
+    renderTodos();
+    updateTimerDisplay();
+  </script>
+</body>
+</html>
