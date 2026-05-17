@@ -4,7 +4,7 @@
   <meta name="base:app_id" content="6a0708e09327121b55779a9b" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MiniBase • App</title>
+  <title>Funko</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
@@ -19,8 +19,8 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-8">
       <h1 class="text-4xl font-bold flex items-center gap-3">
-        <i class="fa-solid fa-cube text-blue-500"></i>
-        MiniBase
+        <i class="fa-solid fa-cube text-violet-500"></i>
+        <span>Funko</span>
       </h1>
       <div class="flex gap-2">
         <button onclick="toggleDark()" class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700">
@@ -56,7 +56,7 @@
       <!-- Sidebar -->
       <div class="space-y-6">
 
-        <!-- Timer / Pomodoro -->
+        <!-- Timer -->
         <div class="bg-gray-900/80 rounded-3xl p-6 border border-gray-700">
           <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
             <i class="fa-solid fa-clock text-orange-400"></i> Focus Timer
@@ -70,27 +70,26 @@
           </div>
         </div>
 
-        <!-- Quick Notes -->
+        <!-- Remembering (Improved Notes) -->
         <div class="bg-gray-900/80 rounded-3xl p-6 border border-gray-700 h-full">
           <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-note-sticky text-purple-400"></i> Quick Note
+            <i class="fa-solid fa-brain text-purple-400"></i> Remembering
           </h2>
           <textarea id="quick-note" 
-                    class="w-full h-48 bg-gray-800 border border-gray-700 rounded-2xl p-4 resize-none focus:outline-none focus:border-purple-500"
-                    placeholder="Write anything..."></textarea>
+                    class="w-full h-64 bg-gray-800 border border-gray-700 rounded-2xl p-4 resize-none focus:outline-none focus:border-purple-500"
+                    placeholder="Brain dump... ideas, reminders, links, anything you want to remember..."></textarea>
+          <p class="text-xs text-gray-500 mt-2 text-right">Auto-saved in browser</p>
         </div>
       </div>
     </div>
 
-    <!-- Footer Stats -->
+    <!-- Footer -->
     <div class="mt-8 text-center text-gray-500 text-sm">
-      Built as single HTML • Data saved in browser
+      Funko • Built as single HTML • Data saved locally
     </div>
   </div>
 
   <script>
-    // Tailwind script already loaded
-
     // Todo List
     let todos = JSON.parse(localStorage.getItem('todos')) || [];
 
@@ -177,17 +176,16 @@
       updateTimerDisplay();
     }
 
-    // Dark mode toggle (already dark by default)
     function toggleDark() {
       document.documentElement.classList.toggle('dark');
     }
 
-    // Auto save note
+    // Remembering - Auto Save
     const noteArea = document.getElementById('quick-note');
-    noteArea.value = localStorage.getItem('quickNote') || '';
+    noteArea.value = localStorage.getItem('funkoRemembering') || '';
     
     noteArea.addEventListener('input', () => {
-      localStorage.setItem('quickNote', noteArea.value);
+      localStorage.setItem('funkoRemembering', noteArea.value);
     });
 
     // Init
