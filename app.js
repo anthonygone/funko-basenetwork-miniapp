@@ -9,7 +9,7 @@ function renderTodos() {
   const container = document.getElementById('todo-list');
   container.innerHTML = '';
 
-  todos.forEach((tod, index) => {
+  todos.forEach((todo, index) => {
     const div = document.createElement('div');
     div.className = `flex items-center gap-3 bg-gray-800/70 rounded-2xl p-4 group transition-all`;
     div.innerHTML = `
