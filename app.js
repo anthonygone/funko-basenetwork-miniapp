@@ -6,7 +6,7 @@ let isRunning = false;
 
 // Render Todos
 function renderTodos() {
-  const container = document.getElementById('todo-list');
+  const container = document.getElementById('tdo-list');
   container.innerHTML = '';
 
   todos.forEach((todo, index) => {
