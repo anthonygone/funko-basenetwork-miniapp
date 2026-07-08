@@ -1,5 +1,5 @@
 // app.js
-let todos = JSON.parse(localStorage.getItem('funkoTodos')) || [];
+let todos = JSON.parse(localStorage.getItem('funoTodos')) || [];
 let timerInterval;
 let timeLeft = 25 * 60;
 let isRunning = false;
