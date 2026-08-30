@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Funko Quest</title>
+
   <meta
     name="description"
-    content="Play, collect, level up and unlock your Funko Quest collection."
+    content="Funko Quest — play, collect and level up on Base."
   />
 
   <link rel="stylesheet" href="./style.css" />
@@ -16,22 +17,22 @@
 <body>
   <main class="app-shell">
 
-    <!-- HEADER -->
     <header class="topbar">
       <div class="brand">
         <div class="logo-icon">🎁</div>
+
         <div>
           <h1>FUNKO QUEST</h1>
           <p>Play. Collect. Level Up.</p>
         </div>
       </div>
 
-      <button id="resetBtn" class="icon-btn" title="Reset progress">
+      <button id="resetBtn" class="icon-btn">
         ↻
       </button>
     </header>
 
-    <!-- PLAYER STATS -->
+    <!-- PLAYER -->
     <section class="stats-card">
       <div class="level-block">
         <span class="label">LEVEL</span>
@@ -77,8 +78,15 @@
         </div>
 
         <div class="game-stats">
-          <span>Score: <strong id="score">0</strong></span>
-          <span>⏱ <strong id="timer">30</strong>s</span>
+          <span>
+            Score:
+            <strong id="score">0</strong>
+          </span>
+
+          <span>
+            ⏱
+            <strong id="timer">30</strong>s
+          </span>
         </div>
       </div>
 
@@ -87,13 +95,19 @@
       </p>
 
       <div id="gameArea" class="game-area">
-        <button id="funkoTarget" class="funko-target" disabled>
+
+        <button
+          id="funkoTarget"
+          class="funko-target"
+          disabled
+        >
           🤖
         </button>
 
         <div id="gameMessage" class="game-message">
           Ready to play?
         </div>
+
       </div>
 
       <button id="startGameBtn" class="primary-btn">
@@ -104,71 +118,164 @@
 
     <!-- MYSTERY BOX -->
     <section class="mystery-card">
+
       <div class="mystery-info">
         <span class="section-label">DAILY DROP</span>
+
         <h2>🎁 Mystery Box</h2>
-        <p>Open a box and discover a collectible.</p>
+
+        <p>
+          Open a box and discover a collectible.
+        </p>
       </div>
 
       <button id="openBoxBtn" class="box-btn">
         Open Box
       </button>
+
     </section>
 
     <!-- COLLECTION -->
     <section class="collection-section">
 
       <div class="section-heading">
+
         <div>
-          <span class="section-label">YOUR COLLECTION</span>
+          <span class="section-label">
+            YOUR COLLECTION
+          </span>
+
           <h2>🧸 Funkos</h2>
         </div>
 
-        <span id="collectionCount" class="collection-count">
+        <span
+          id="collectionCount"
+          class="collection-count"
+        >
           0 collected
         </span>
+
       </div>
 
-      <div id="collectionGrid" class="collection-grid"></div>
+      <div
+        id="collectionGrid"
+        class="collection-grid"
+      ></div>
 
     </section>
 
-    <!-- BASE SECTION -->
+    <!-- BASE -->
     <section class="base-card">
+
       <div>
-        <span class="section-label">ONCHAIN</span>
-        <h2>🔵 Built for Base</h2>
+        <span class="section-label">
+          BASE MAINNET
+        </span>
+
+        <h2>🔵 Base Wallet</h2>
+
+        <p id="walletStatus">
+          Connect your wallet to unlock onchain Funko rewards.
+        </p>
+
+        <p
+          id="walletAddress"
+          style="
+            margin-top:8px;
+            font-family:monospace;
+            font-size:12px;
+            word-break:break-all;
+          "
+        ></p>
+      </div>
+
+      <button
+        id="connectWalletBtn"
+        class="secondary-btn"
+      >
+        Connect Wallet
+      </button>
+
+    </section>
+
+    <!-- ONCHAIN REWARD -->
+    <section
+      id="onchainRewardCard"
+      class="base-card"
+      style="display:none;"
+    >
+
+      <div>
+        <span class="section-label">
+          ONCHAIN REWARD
+        </span>
+
+        <h2>🏆 Claim Funko</h2>
+
         <p>
-          Your future rewards and collectible claims can be recorded on Base.
+          Your game progress can be connected to
+          a future onchain collectible.
         </p>
       </div>
 
-      <button id="connectWalletBtn" class="secondary-btn">
-        Connect Wallet
+      <button
+        id="claimFunkoBtn"
+        class="primary-btn"
+        style="max-width:180px;"
+      >
+        Claim Funko
       </button>
+
     </section>
 
     <p class="builder-code">
-      Builder Code: <code>bc_z2bsqs1j</code>
+      Builder Code:
+      <code>bc_z2bsqs1j</code>
     </p>
 
   </main>
 
-  <!-- REWARD MODAL -->
+  <!-- MODAL -->
   <div id="modal" class="modal hidden">
-    <div class="modal-card">
-      <button id="closeModalBtn" class="close-btn">×</button>
 
-      <div id="modalEmoji" class="reward-emoji">🎉</div>
-      <h2 id="modalTitle">Reward!</h2>
+    <div class="modal-card">
+
+      <button
+        id="closeModalBtn"
+        class="close-btn"
+      >
+        ×
+      </button>
+
+      <div
+        id="modalEmoji"
+        class="reward-emoji"
+      >
+        🎉
+      </div>
+
+      <h2 id="modalTitle">
+        Reward!
+      </h2>
+
       <p id="modalText"></p>
 
-      <button id="modalActionBtn" class="primary-btn">
+      <button
+        id="modalActionBtn"
+        class="primary-btn"
+      >
         Awesome!
       </button>
+
     </div>
+
   </div>
 
+  <!-- BASE ACCOUNT SDK -->
+  <script src="https://unpkg.com/@base-org/account/dist/base-account.min.js"></script>
+
+  <!-- GAME -->
   <script src="./app.js"></script>
+
 </body>
 </html>
