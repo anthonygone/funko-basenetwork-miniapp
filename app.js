@@ -1,3 +1,12 @@
+import {
+  createPublicClient,
+  createWalletClient,
+  custom,
+  http
+} from "https://esm.sh/viem@2.45.0";
+
+import { base } from "https://esm.sh/viem@2.45.0/chains";
+
 const BUILDER_CODE = "bc_z2bsqs1j";
 
 const BASE_CHAIN_ID = "0x2105";
