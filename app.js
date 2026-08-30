@@ -12,6 +12,82 @@ const BUILDER_CODE = "bc_z2bsqs1j";
 const BASE_CHAIN_ID = "0x2105";
 const BASE_CHAIN_DECIMAL = 8453;
 
+const FUNKO_CONTRACT =
+  "0x859cb50827bdaf5d980dc8ff79e5cd82094e9296";
+
+/*
+ * ERC-8021 attribution suffix for:
+ * Builder Code: bc_z2bsqs1j
+ */
+const DATA_SUFFIX =
+  "0x62635f7a3262737173316a0b0080218021802180218021802180218021";
+
+const FUNKO_ABI = [
+  {
+    type: "function",
+    name: "claimFunko",
+    stateMutability: "nonpayable",
+    inputs: [
+      {
+        name: "_funkoType",
+        type: "uint8"
+      }
+    ],
+    outputs: []
+  },
+  {
+    type: "function",
+    name: "hasClaimed",
+    stateMutability: "view",
+    inputs: [
+      {
+        name: "",
+        type: "address"
+      }
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "bool"
+      }
+    ]
+  },
+  {
+    type: "function",
+    name: "totalMinted",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ]
+  },
+  {
+    type: "function",
+    name: "funkoType",
+    stateMutability: "view",
+    inputs: [
+      {
+        name: "",
+        type: "uint256"
+      }
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "uint8"
+      }
+    ]
+  }
+];
+
+const publicClient = createPublicClient({
+  chain: base,
+  transport: http("https://mainnet.base.org")
+});
+
 const COLLECTIBLES = [
   {
     id: "robot",
@@ -919,174 +995,241 @@ function renderWallet() {
 
 async function claimFunko() {
 
-  if (
-    !state.walletAddress
-  ) {
+  try {
 
-    await connectBaseAccount();
+    if (!state.walletAddress) {
 
-    return;
-  }
+      await connectBaseAccount();
 
-  /*
-    IMPORTANT:
+      if (!state.walletAddress) {
+        return;
+      }
+    }
 
-    The Funko collectible contract has not
-    been deployed yet.
+    const walletAddress =
+      state.walletAddress;
 
-    We will add the real contract address
-    after deploying the Funko Quest contract
-    on Base Mainnet.
+    /*
+     * Make sure the connected wallet is
+     * actually on Base Mainnet.
+     */
+    const provider =
+      baseProvider || window.ethereum;
 
-    Builder Code:
-    bc_z2bsqs1j
-  */
+    if (!provider) {
+      throw new Error(
+        "Wallet provider not found."
+      );
+    }
 
-  showModal(
-    "🏆",
-    "Almost Ready!",
-    "Your Base wallet is connected. The next step is deploying the Funko Quest collectible contract on Base Mainnet. Then this button will perform the real onchain claim."
-  );
-}
-
-
-/* =========================
-   MODAL
-========================= */
-
-function showModal(
-  emoji,
-  title,
-  text
-) {
-
-  elements.modalEmoji.textContent =
-    emoji;
-
-  elements.modalTitle.textContent =
-    title;
-
-  elements.modalText.textContent =
-    text;
-
-  elements.modal.classList.remove(
-    "hidden"
-  );
-}
-
-
-function closeModal() {
-
-  elements.modal.classList.add(
-    "hidden"
-  );
-}
-
-
-/* =========================
-   RESET
-========================= */
-
-function resetGame() {
-
-  const confirmed =
-    confirm(
-      "Reset all Funko Quest progress?"
-    );
-
-  if (!confirmed) return;
-
-  localStorage.removeItem(
-    "funkoQuestSave"
-  );
-
-  location.reload();
-}
-
-
-/* =========================
-   EVENTS
-========================= */
-
-elements.startGameBtn
-  .addEventListener(
-    "click",
-    startGame
-  );
-
-elements.funkoTarget
-  .addEventListener(
-    "click",
-    hitTarget
-  );
-
-elements.dailyRewardBtn
-  .addEventListener(
-    "click",
-    claimDailyReward
-  );
-
-elements.openBoxBtn
-  .addEventListener(
-    "click",
-    openMysteryBox
-  );
-
-elements.connectWalletBtn
-  .addEventListener(
-    "click",
-    connectBaseAccount
-  );
-
-elements.claimFunkoBtn
-  .addEventListener(
-    "click",
-    claimFunko
-  );
-
-elements.closeModalBtn
-  .addEventListener(
-    "click",
-    closeModal
-  );
-
-elements.modalActionBtn
-  .addEventListener(
-    "click",
-    closeModal
-  );
-
-elements.resetBtn
-  .addEventListener(
-    "click",
-    resetGame
-  );
-
-elements.modal.addEventListener(
-  "click",
-  event => {
+    const chainId =
+      await provider.request({
+        method: "eth_chainId"
+      });
 
     if (
-      event.target ===
-      elements.modal
+      chainId.toLowerCase() !==
+      BASE_CHAIN_ID
     ) {
 
-      closeModal();
+      showModal(
+        "🔵",
+        "Switch to Base",
+        "Please switch your wallet to Base Mainnet."
+      );
+
+      return;
     }
+
+    /*
+     * Check the real smart contract.
+     */
+    const alreadyClaimed =
+      await publicClient.readContract({
+        address: FUNKO_CONTRACT,
+        abi: FUNKO_ABI,
+        functionName: "hasClaimed",
+        args: [walletAddress]
+      });
+
+    if (alreadyClaimed) {
+
+      showModal(
+        "🧸",
+        "Already Claimed!",
+        "This wallet has already claimed its Funko on Base Mainnet."
+      );
+
+      elements.claimFunkoBtn.disabled =
+        true;
+
+      elements.claimFunkoBtn.textContent =
+        "Already Claimed ✓";
+
+      return;
+    }
+
+    /*
+     * Funko type is determined by gameplay.
+     *
+     * 0 = Base Bot
+     * 1 = Moon Alien
+     * 2 = Crypto Wizard
+     * 3 = Base Ninja
+     * 4 = Chain King
+     * 5 = Legendary Unicorn
+     */
+    const funkoType =
+      Math.min(
+        5,
+        Math.floor(score / 10)
+      );
+
+    const walletClient =
+      createWalletClient({
+        chain: base,
+        transport: custom(provider)
+      });
+
+    /*
+     * Check current onchain token count.
+     */
+    const tokenBefore =
+      await publicClient.readContract({
+        address: FUNKO_CONTRACT,
+        abi: FUNKO_ABI,
+        functionName: "totalMinted"
+      });
+
+    elements.claimFunkoBtn.disabled =
+      true;
+
+    elements.claimFunkoBtn.textContent =
+      "Confirm in Wallet...";
+
+    /*
+     * REAL BASE MAINNET TRANSACTION
+     *
+     * Builder Code is attached through
+     * ERC-8021 dataSuffix.
+     */
+    const txHash =
+      await walletClient.writeContract({
+
+        address:
+          FUNKO_CONTRACT,
+
+        abi:
+          FUNKO_ABI,
+
+        functionName:
+          "claimFunko",
+
+        args:
+          [funkoType],
+
+        account:
+          walletAddress,
+
+        dataSuffix:
+          DATA_SUFFIX
+      });
+
+    elements.claimFunkoBtn.textContent =
+      "Minting...";
+
+    showModal(
+      "⏳",
+      "Transaction Sent!",
+      "Your Funko claim is being confirmed on Base Mainnet."
+    );
+
+    /*
+     * Wait for confirmation.
+     */
+    const receipt =
+      await publicClient.waitForTransactionReceipt({
+        hash: txHash
+      });
+
+    if (
+      receipt.status !== "success"
+    ) {
+
+      throw new Error(
+        "The transaction reverted."
+      );
+    }
+
+    /*
+     * Save the claimed Funko locally.
+     */
+    const collectible =
+      COLLECTIBLES[funkoType];
+
+    if (
+      collectible &&
+      !state.collection.includes(
+        collectible.id
+      )
+    ) {
+
+      state.collection.push(
+        collectible.id
+      );
+    }
+
+    state.coins += 100;
+    state.xp += 100;
+
+    saveGame();
+    render();
+
+    elements.claimFunkoBtn.disabled =
+      true;
+
+    elements.claimFunkoBtn.textContent =
+      "Funko Claimed ✓";
+
+    showModal(
+      collectible
+        ? collectible.emoji
+        : "🧸",
+      "Funko Claimed!",
+      `${collectible ? collectible.name : "Funko"} is now yours on Base Mainnet.`
+    );
+
+    console.log(
+      "FUNKO CLAIM SUCCESS",
+      {
+        transaction: txHash,
+        contract: FUNKO_CONTRACT,
+        wallet: walletAddress,
+        funkoType,
+        tokenId: tokenBefore.toString(),
+        builderCode: BUILDER_CODE
+      }
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Funko claim failed:",
+      error
+    );
+
+    elements.claimFunkoBtn.disabled =
+      false;
+
+    elements.claimFunkoBtn.textContent =
+      "Claim Funko";
+
+    showModal(
+      "⚠️",
+      "Claim Failed",
+      error.shortMessage ||
+      error.message ||
+      "The Funko claim failed."
+    );
   }
-);
-
-
-/* =========================
-   START
-========================= */
-
-loadGame();
-
-console.log(
-  "Funko Quest",
-  "Base Mainnet",
-  BASE_CHAIN_DECIMAL,
-  "Builder:",
-  BUILDER_CODE
-);
+}
