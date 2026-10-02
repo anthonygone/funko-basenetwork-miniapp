@@ -1,4 +1,4 @@
-import solidity
+import solid
   createPublicClient,
   createWalletClient,
   custom,
