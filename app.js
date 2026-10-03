@@ -1,4 +1,4 @@
-import solidity
+import deafut
   createPublicClient,
   createWalletClient,
   custom,
