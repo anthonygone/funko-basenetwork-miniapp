@@ -5,7 +5,7 @@ import deafut
   http
 } from "https://esm.sh/viem@2.45.0";
 
-import { base } from "https://esm.sh/viem@2.45.0/chains";
+import { b } from "https://esm.sh/viem@2.45.0/chains";
 
 const BUILDER_CODE = "bc_z2bsqs1j";
 
