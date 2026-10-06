@@ -1,4 +1,4 @@
-import deafut
+import default
   createPublicClient,
   createWalletClient,
   custom,
