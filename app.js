@@ -1,4 +1,4 @@
-import def
+import default
   createPublicClient,
   createWalletClient,
   custom,
