@@ -218,7 +218,7 @@ const elements = {
 
 
 /* =========================
-   SAVE / LOAD
+   SAVE / LOAD /
 ========================= */
 
 function loadGame() {
